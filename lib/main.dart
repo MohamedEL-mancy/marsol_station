@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:marsol/constants/lists_widgets.dart';
 import 'package:marsol/constants/widgets/screens_widgets/details_screen_widgets.dart';
+import 'package:marsol/helper_provider/map_data.dart';
 
 import 'package:marsol/screens/Registration.dart';
 import 'package:marsol/screens/add_to_cart.dart';
@@ -37,6 +38,9 @@ class Marsol extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => DetailsWidgets(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => MapData(),
+        )
       ],
       child: MaterialApp(
           //builder: DevicePreview.appBuilder,

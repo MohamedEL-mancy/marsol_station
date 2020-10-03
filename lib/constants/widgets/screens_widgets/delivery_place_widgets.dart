@@ -8,6 +8,7 @@ Widget deliveryInfo(
     String title,
     String subTitle,
     IconData icon,
+    double width,
     bool isActive}) {
   return Container(
     padding: EdgeInsets.only(top: 10.0, right: 10.0),
@@ -38,17 +39,23 @@ Widget deliveryInfo(
               indent: 1,
               endIndent: 10,
             ),
-            Column(
-              children: [
-                Text(
-                  title,
-                  style: isActive ? describtionTextStyle : blackTexts,
-                ),
-                Text(
-                  subTitle,
-                  style: isActive ? describtionTextStyle : blackTexts,
-                ),
-              ],
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: isActive ? describtionTextStyle : blackTexts,
+                  ),
+                  Container(
+                    width: width,
+                    child: Text(
+                      subTitle,
+                      style: isActive ? describtionTextStyle : blackTexts,
+                    ),
+                  ),
+                ],
+              ),
             )
           ],
         ),

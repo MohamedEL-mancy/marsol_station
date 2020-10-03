@@ -76,6 +76,7 @@ class _ReadyToOrderState extends State<ReadyToOrder> {
                     'subTitle': subTitle,
                   });
                   int ids = await helper.createOrders(order);
+                  print(ids);
                 },
                 child: buttons(
                   title: "صفحة طلباتي",

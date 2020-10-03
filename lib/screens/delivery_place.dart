@@ -2,19 +2,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+
 import 'package:marsol/constants/colors_app.dart';
 import 'package:marsol/constants/custom_texts.dart';
 import 'package:marsol/constants/widgets.dart';
 import 'package:marsol/constants/widgets/screens_widgets/delivery_place_widgets.dart';
+import 'package:marsol/helper_provider/map_data.dart';
 import 'package:marsol/screens/ready_to_order.dart';
 import 'package:marsol/screens/user_location.dart';
+import 'package:provider/provider.dart';
 
 class DeliveryPlace extends StatefulWidget {
   static String id = "DeliveryPlace";
-  final String clientAddres;
-  DeliveryPlace({this.clientAddres = ""});
+
   @override
   _DeliveryPlaceState createState() => _DeliveryPlaceState();
 }
@@ -23,44 +26,41 @@ class _DeliveryPlaceState extends State<DeliveryPlace> {
   bool active = true;
   bool inActive = false;
   int index = 0;
-  Location location = Location();
-  double long, lat;
-  bool serviceEnable = false;
 
-  void getCurrentLocation() async {
-    LocationData position = await location.getLocation();
-    setState(() {
-      long = position.longitude;
-      lat = position.latitude;
-    });
-    if (await location.serviceEnabled()) {
-      setState(() {
-        serviceEnable = true;
-      });
-    } else {
-      setState(() {
-        serviceEnable = false;
-      });
-    }
-  }
+  double long = -122.085749655962, lat = 37.42796133580664;
 
   GoogleMapController _controller;
-  @override
-  void initState() {
-    super.initState();
-    getCurrentLocation();
+  void getCurrentAddress() async {
+    Position position;
+    var currentPosition =
+        await getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    position = currentPosition;
+    _controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: 18.0,
+        ),
+      ),
+    );
+
+    Provider.of<MapData>(context, listen: false)
+        .getLatAddress(position.latitude);
+    Provider.of<MapData>(context, listen: false)
+        .getLongAddress(position.longitude);
   }
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-
+    double width = MediaQuery.of(context).size.width;
+    var data = Provider.of<MapData>(context).placeName;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -108,40 +108,31 @@ class _DeliveryPlaceState extends State<DeliveryPlace> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                   ),
-                  child: lat != null && long != null
-                      ? GoogleMap(
-                          mapType: MapType.normal,
-                          myLocationEnabled: true,
-                          zoomControlsEnabled: false,
-                          initialCameraPosition: CameraPosition(
-                              target: LatLng(lat, long), zoom: 17.0),
-                          markers: {
-                            Marker(
-                              flat: false,
-                              draggable: true,
-                              markerId: MarkerId("Home"),
-                              position: LatLng(lat, long),
-                            )
-                          },
-                          onMapCreated: (controller) {
-                            setState(() {
-                              _controller = controller;
-                            });
-                          },
-                          gestureRecognizers:
-                              <Factory<OneSequenceGestureRecognizer>>[
-                            Factory<OneSequenceGestureRecognizer>(
-                              () => EagerGestureRecognizer(),
-                            )
-                          ].toSet(),
-                        )
-                      : serviceEnable
-                          ? Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : Center(
-                              child: Text("You Need To Turn On Your GPS"),
-                            ),
+                  child: GoogleMap(
+                    mapType: MapType.normal,
+                    myLocationEnabled: true,
+                    zoomControlsEnabled: false,
+                    myLocationButtonEnabled: true,
+                    initialCameraPosition:
+                        CameraPosition(target: LatLng(lat, long), zoom: 16.0),
+                    markers: {
+                      Marker(
+                        flat: false,
+                        draggable: true,
+                        markerId: MarkerId("Home"),
+                        position: LatLng(lat, long),
+                      )
+                    },
+                    onMapCreated: (controller) {
+                      _controller = controller;
+                      getCurrentAddress();
+                    },
+                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                      Factory<OneSequenceGestureRecognizer>(
+                        () => EagerGestureRecognizer(),
+                      )
+                    ].toSet(),
+                  ),
                 ),
               ),
               Container(
@@ -161,7 +152,8 @@ class _DeliveryPlaceState extends State<DeliveryPlace> {
                 child: deliveryInfo(
                   height: height * 0.12,
                   title: "التوصيل إلي",
-                  subTitle: widget.clientAddres,
+                  subTitle: data == null ? "عنوانك" : data,
+                  width: width * 0.7,
                   icon: Icons.location_on,
                   isActive: index == 0 ? active : inActive,
                 ),

@@ -20,13 +20,13 @@ Widget infoProfileSettings({String title, String info}) {
   );
 }
 
-Widget infoAppSetting({String title, String info}) {
+Widget infoAppSetting({String title, String info, String image}) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Row(
         children: [
-          Icon(Icons.alarm, color: Colors.white),
+          Image.asset(image, height: 25.0),
           SizedBox(width: 5.0),
           Text(
             title,
@@ -72,9 +72,9 @@ Widget containerProfileSetting({double height}) {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.alarm,
-                  color: Colors.white,
+                Image.asset(
+                  "assets/icons/settings/setting_prof.png",
+                  height: 40.0,
                 ),
                 SizedBox(width: 5.0),
                 Text(
@@ -139,9 +139,21 @@ Widget containerAppSetting({double height}) {
             ),
           ],
         ),
-        infoAppSetting(title: "اللغة", info: "العربية"),
-        infoAppSetting(title: "عنوان التوصيل", info: ""),
-        infoAppSetting(title: "المساعدة والدعم", info: "")
+        infoAppSetting(
+          title: "اللغة",
+          info: "العربية",
+          image: "assets/icons/settings/setting_lang.png",
+        ),
+        infoAppSetting(
+          title: "عنوان التوصيل",
+          info: "",
+          image: "assets/icons/settings/setting_location.png",
+        ),
+        infoAppSetting(
+          title: "المساعدة والدعم",
+          info: "",
+          image: "assets/icons/settings/setting_help.png",
+        )
       ],
     ),
   );
